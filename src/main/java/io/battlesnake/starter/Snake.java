@@ -147,14 +147,21 @@ JsonNode getJsonData(){
 
         /**
          * /move is called by the engine for each turn the snake has.
-         *
+         * 
          * @param moveRequest a map containing the JSON sent to this snake. See the spec for details of what this contains.
          * @return a response back to the engine containing snake movement values.
          */
        
         
-         public Map<String, String> move(JsonNode moveRequest) {
-            System.out.println(moveRequest);
+        public Map<String, String> move(JsonNode moveRequest) {
+            String id = moveRequest.get("game").get("id").textValue();
+            int boardHieght = moveRequest.get("board").get("height").intValue();
+            int boardWidth = moveRequest.get("board").get("width").intValue();
+            
+            System.out.println(id);
+            System.out.println(boardHieght);
+            System.out.println(boardWidth);
+
             Map<String, String> response = new HashMap<>();
             response.put("move", "right");
             return response;
