@@ -99,6 +99,38 @@ public class Snake {
             return EMPTY;
         }
 
+//methid to store Id and board hieght and widthstatic
+JsonNode getJsonData(){
+    String id = JsonNode.get("id").textValue();
+    String boardHieght = JsonNode.get("height").textValue();
+    String boardwidth = JsonNode.get("width").textValue();
+    
+    System.out.println(id);
+    System.out.println(boardHieght);
+    System.out.println(boardwidth);
+    
+}
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         /**
          * /start is called by the engine when a game is first run.
          *
@@ -111,13 +143,17 @@ public class Snake {
             return response;
         }
 
+
+
         /**
          * /move is called by the engine for each turn the snake has.
          *
          * @param moveRequest a map containing the JSON sent to this snake. See the spec for details of what this contains.
          * @return a response back to the engine containing snake movement values.
          */
-        public Map<String, String> move(JsonNode moveRequest) {
+       
+        
+         public Map<String, String> move(JsonNode moveRequest) {
             System.out.println(moveRequest);
             Map<String, String> response = new HashMap<>();
             response.put("move", "right");
