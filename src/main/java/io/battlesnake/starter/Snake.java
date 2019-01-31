@@ -9,6 +9,9 @@ import spark.Response;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
 
 import static spark.Spark.port;
 import static spark.Spark.post;
@@ -155,12 +158,27 @@ JsonNode getJsonData(){
         
         public Map<String, String> move(JsonNode moveRequest) {
             String id = moveRequest.get("game").get("id").textValue();
-            int boardHieght = moveRequest.get("board").get("height").intValue();
+            int boardHeight = moveRequest.get("board").get("height").intValue();
             int boardWidth = moveRequest.get("board").get("width").intValue();
+            Iterator<JsonNode> bodyIter = moveRequest.get("you").get("body").elements();
+            List<int[]> body = new ArrayList<int[]>();
+
+            while (bodyIter.hasNext()) {
+                JsonNode coord = bodyIter.next();
+                int x = coord.get("x").intValue();
+                int y = coord.get("y").intValue();
+
+                body.add(new int[] {x, y});
+            }
             
             System.out.println(id);
-            System.out.println(boardHieght);
+            System.out.println(boardHeight);
             System.out.println(boardWidth);
+
+            for (int i = 0; i < body.size(); i++) {
+                int[] coord = body.get(i);
+                System.out.println(coord[0] + "," + coord[1]);
+            }
 
             Map<String, String> response = new HashMap<>();
             response.put("move", "right");
