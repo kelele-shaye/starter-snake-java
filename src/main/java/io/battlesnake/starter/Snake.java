@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.LinkedList;
 
 import static spark.Spark.port;
 import static spark.Spark.post;
@@ -102,38 +105,6 @@ public class Snake {
             return EMPTY;
         }
 
-//methid to store Id and board hieght and widthstatic
-JsonNode getJsonData(){
-    String id = JsonNode.get("id").textValue();
-    String boardHieght = JsonNode.get("height").textValue();
-    String boardwidth = JsonNode.get("width").textValue();
-    
-    System.out.println(id);
-    System.out.println(boardHieght);
-    System.out.println(boardwidth);
-    
-}
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         /**
          * /start is called by the engine when a game is first run.
          *
@@ -183,31 +154,60 @@ JsonNode getJsonData(){
 
             int xHead = body.get(0)[0];
             int yHead = body.get(0)[1];
+
+            int[] right = { xHead + 1, yHead };
+            int[] down = { xHead, yHead + 1 };
+            int[] left = { xHead - 1, yHead };
+            int[] up = { xHead, yHead - 1 };
         
-            boolean right = isInBounds(xHead + 1, yHead, boardWidth, boardHeight);
-            boolean down = isInBounds(xHead, yHead + 1, boardWidth, boardHeight);
-            boolean left = isInBounds(xHead - 1, yHead, boardWidth, boardHeight);
-            boolean up = isInBounds(xHead, yHead - 1, boardWidth, boardHeight);
-        
-            if (right == true){
-                response.put("move","right");
-            } else if (down == true){
-                response.put("move","down");
-            } else if (left == true){
-                response.put("move","left");
-            } else if (up==true){
-                response.put("move","up");
+            boolean isRightValid = isInBounds(right, boardWidth, boardHeight) && !isColliding(right, body);
+            boolean isDownValid = isInBounds(down, boardWidth, boardHeight) && !isColliding(down, body);
+            boolean isLeftValid = isInBounds(left, boardWidth, boardHeight) && !isColliding(left, body);
+            boolean isUpValid = isInBounds(up, boardWidth, boardHeight) && !isColliding(up, body);
+
+            List<String> directions = new LinkedList<String>(Arrays.asList("right", "down", "left", "up"));
+
+            if (!isRightValid) {
+                directions.remove("right");
             }
+            
+            if (!isDownValid) {
+                directions.remove("down");
+            }
+            
+            if (!isLeftValid) {
+                directions.remove("left");
+            }
+            
+            if (!isUpValid) {
+                directions.remove("up");
+            }
+
+            Random rand = new Random();
+
+            response.put("move", directions.get(rand.nextInt(directions.size())));
 
             return response;
         }
 
-        public boolean isInBounds(int x, int y, int boardWidth, int boardHeight) {
-            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
+        public boolean isInBounds(int[] coord, int boardWidth, int boardHeight) {
+            if (coord[0] < 0 || coord[0] >= boardWidth || coord[1] < 0 || coord[1] >= boardHeight) {
                 return false;
             }
         
             return true;
+        }
+
+        public boolean isColliding(int[] coord, List<int[]> body) {
+            for (int i = 0; i < body.size(); i++) {
+                int[] bodyCoord = body.get(i);
+
+                if (coord[0] == bodyCoord[0] && coord[1] == bodyCoord[1]) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /**
