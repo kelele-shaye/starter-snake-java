@@ -157,6 +157,7 @@ JsonNode getJsonData(){
        
         
         public Map<String, String> move(JsonNode moveRequest) {
+            Map<String, String> response = new HashMap<>();
             String id = moveRequest.get("game").get("id").textValue();
             int boardHeight = moveRequest.get("board").get("height").intValue();
             int boardWidth = moveRequest.get("board").get("width").intValue();
@@ -180,9 +181,33 @@ JsonNode getJsonData(){
                 System.out.println(coord[0] + "," + coord[1]);
             }
 
-            Map<String, String> response = new HashMap<>();
-            response.put("move", "right");
+            int xHead = body.get(0)[0];
+            int yHead = body.get(0)[1];
+        
+            boolean right = isInBounds(xHead + 1, yHead, boardWidth, boardHeight);
+            boolean down = isInBounds(xHead, yHead + 1, boardWidth, boardHeight);
+            boolean left = isInBounds(xHead - 1, yHead, boardWidth, boardHeight);
+            boolean up = isInBounds(xHead, yHead - 1, boardWidth, boardHeight);
+        
+            if (right == true){
+                response.put("move","right");
+            } else if (down == true){
+                response.put("move","down");
+            } else if (left == true){
+                response.put("move","left");
+            } else if (up==true){
+                response.put("move","up");
+            }
+
             return response;
+        }
+
+        public boolean isInBounds(int x, int y, int boardWidth, int boardHeight) {
+            if (x < 0 || x >= boardWidth || y < 0 || y >= boardHeight) {
+                return false;
+            }
+        
+            return true;
         }
 
         /**
@@ -196,5 +221,4 @@ JsonNode getJsonData(){
             return response;
         }
     }
-
 }
