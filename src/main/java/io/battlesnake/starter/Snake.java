@@ -156,11 +156,14 @@ public class Snake {
 
                 while (bodyIter.hasNext()) {
                     JsonNode coord = bodyIter.next();
-                    int x = coord.get("x").intValue();
-                    int y = coord.get("y").intValue();
-    
-                    grid.setNodeState(x,y, NodeState.NOT_WALKABLE);
-                    allBodies.add(new int[] {x, y});
+
+                    if (bodyIter.hasNext()) {
+                        int x = coord.get("x").intValue();
+                        int y = coord.get("y").intValue();
+        
+                        grid.setNodeState(x, y, NodeState.NOT_WALKABLE);
+                        allBodies.add(new int[] {x, y});
+                    }
                 }
             }
 
@@ -174,32 +177,43 @@ public class Snake {
                 food.add(new int[] {x, y});
             }
 
-            if (food.size() == 0) {
-                response.put("move", getRandomMove(boardWidth, boardHeight, ourBody, allBodies));
-            } else {
-                int xHead = ourBody.get(0)[0];
-                int yHead = ourBody.get(0)[1];
+            int xHead = ourBody.get(0)[0];
+            int yHead = ourBody.get(0)[1];
+            int xTail = ourBody.get(ourBody.size() - 1)[0];
+            int yTail = ourBody.get(ourBody.size() - 1)[1];
+            int[] directionVector = new int[] { 0, 0 };
+            List<AStarNode> path = grid.getPath(xHead, yHead, xTail, yTail);
+
+            if (path.size() > 0) {
+                AStarNode node = path.get(0);
+
+                directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };   
+            }
+
+            if (food.size() > 0) {
                 int[] targetFood = food.get(0);
 
-                List<AStarNode> path = grid.getPath(xHead, yHead, targetFood[0], targetFood[1]);
+                List<AStarNode> pathToFood = grid.getPath(xHead, yHead, targetFood[0], targetFood[1]);
 
-                if (path.size() == 0) {
-                    response.put("move", getRandomMove(boardWidth, boardHeight, ourBody, allBodies));
-                } else {
-                    AStarNode node = path.get(0);
+                if (pathToFood.size() > 0) {
+                    AStarNode node = pathToFood.get(0);
 
-                    int[] directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
-
-                    if (directionVector[0] == 1 && directionVector[1] == 0) {
-                        response.put("move", "right");
-                    } else if (directionVector[0] == 0 && directionVector[1] == 1) {
-                        response.put("move", "down");
-                    } else if (directionVector[0] == -1 && directionVector[1] == 0) {
-                        response.put("move", "left");
-                    } else if (directionVector[0] == 0 && directionVector[1] == -1) {
-                        response.put("move", "up");
+                    if (grid.getPath(node.getX(), node.getY(), xTail, yTail).size() > 0) {
+                        directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
                     }
                 }
+            }
+
+            if (directionVector[0] == 1 && directionVector[1] == 0) {
+                response.put("move", "right");
+            } else if (directionVector[0] == 0 && directionVector[1] == 1) {
+                response.put("move", "down");
+            } else if (directionVector[0] == -1 && directionVector[1] == 0) {
+                response.put("move", "left");
+            } else if (directionVector[0] == 0 && directionVector[1] == -1) {
+                response.put("move", "up");
+            } else {
+                response.put("move", getRandomMove(boardWidth, boardHeight, ourBody, allBodies));
             }
 
             return response;
