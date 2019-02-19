@@ -20,9 +20,10 @@ import static spark.Spark.port;
 import static spark.Spark.post;
 import static spark.Spark.get;
 
-import com.almasb.astar.AStarGrid;
-import com.almasb.astar.AStarNode;
-import com.almasb.astar.NodeState;
+import org.xguzm.pathfinding.grid.NavigationGrid;
+import org.xguzm.pathfinding.grid.GridCell;
+import org.xguzm.pathfinding.finders.AStarFinder;
+import org.xguzm.pathfinding.grid.finders.GridFinderOptions;
 
 /**
  * Snake server that deals with requests from the snake engine.
@@ -135,10 +136,16 @@ public class Snake {
             Map<String, String> response = new HashMap<>();
             int boardHeight = moveRequest.get("board").get("height").intValue();
             int boardWidth = moveRequest.get("board").get("width").intValue();
-            AStarGrid grid = new AStarGrid(boardWidth, boardHeight);
+            GridCell[][] grid = new GridCell[boardWidth][boardHeight];
             List<int[]> ourBody = new ArrayList<int[]>();
             List<int[]> allBodies = new ArrayList<int[]>();
             List<int[]> food = new ArrayList<int[]>();
+
+            for (int i = 0; i < grid.length; i++) {
+                for (int j = 0; j < grid[i].length; j++) {
+                    grid[i][j] = new GridCell(i, j, true);
+                }
+            }
 
             Iterator<JsonNode> ourBodyIter = moveRequest.get("you").get("body").elements();
 
@@ -161,7 +168,7 @@ public class Snake {
                         int x = coord.get("x").intValue();
                         int y = coord.get("y").intValue();
         
-                        grid.setNodeState(x, y, NodeState.NOT_WALKABLE);
+                        grid[x][y] = new GridCell(x, y, false);
                         allBodies.add(new int[] {x, y});
                     }
                 }
@@ -177,36 +184,43 @@ public class Snake {
                 food.add(new int[] {x, y});
             }
 
+            NavigationGrid<GridCell> navGrid = new NavigationGrid<GridCell>(grid, false);
+            GridFinderOptions opt = new GridFinderOptions();
+            opt.allowDiagonal = false;
+            AStarFinder<GridCell> finder = new AStarFinder<GridCell>(GridCell.class, opt);
+
             int xHead = ourBody.get(0)[0];
             int yHead = ourBody.get(0)[1];
             int xTail = ourBody.get(ourBody.size() - 1)[0];
             int yTail = ourBody.get(ourBody.size() - 1)[1];
             int[] directionVector = new int[] { 0, 0 };
-            List<AStarNode> pathToTail = grid.getPath(xHead, yHead, xTail, yTail);
+            List<GridCell> pathToTail = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(xTail, yTail), navGrid);
 
-            if (pathToTail.size() > 0) {
-                AStarNode node = pathToTail.get(0);
+            if (pathToTail != null && pathToTail.size() > 0) {
+                System.out.println("Tail path size: " + pathToTail.size());
+
+                GridCell node = pathToTail.get(0);
 
                 directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };   
-            }
-
-            System.out.println("Tail path size: " + pathToTail.size());
+            }            
 
             if (food.size() > 0) {
                 int[] targetFood = food.get(0);
 
-                List<AStarNode> pathToFood = grid.getPath(xHead, yHead, targetFood[0], targetFood[1]);
+                List<GridCell> pathToFood = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(targetFood[0], targetFood[1]), navGrid);
 
-                System.out.println("Food path size: " + pathToFood.size());
+                
 
-                if (pathToFood.size() > 0) {
-                    AStarNode node = pathToFood.get(0);
+                if (pathToFood != null && pathToFood.size() > 0) {
+                    System.out.println("Food path size: " + pathToFood.size());
 
-                    List<AStarNode> pathToTailFromFoodNode = grid.getPath(node.getX(), node.getY(), xTail, yTail);
+                    GridCell node = pathToFood.get(0);
 
-                    System.out.println("Tail food path size: " + pathToTailFromFoodNode.size());
+                    List<GridCell> pathToTailFromFoodNode = finder.findPath(navGrid.getCell(node.getX(), node.getY()), navGrid.getCell(xTail, yTail), navGrid);                    
 
-                    if (pathToTailFromFoodNode.size() > 0) {
+                    if (pathToTailFromFoodNode != null && pathToTailFromFoodNode.size() > 0) {
+                        System.out.println("Tail food path size: " + pathToTailFromFoodNode.size());
+
                         directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
                     }
                 }
