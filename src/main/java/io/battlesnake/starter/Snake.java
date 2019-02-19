@@ -129,41 +129,46 @@ public class Snake {
         
         public Map<String, String> move(JsonNode moveRequest) {
             Map<String, String> response = new HashMap<>();
-            String id = moveRequest.get("game").get("id").textValue();
             int boardHeight = moveRequest.get("board").get("height").intValue();
             int boardWidth = moveRequest.get("board").get("width").intValue();
-            Iterator<JsonNode> bodyIter = moveRequest.get("you").get("body").elements();
-            List<int[]> body = new ArrayList<int[]>();
+            List<int[]> ourBody = new ArrayList<int[]>();
+            List<int[]> allBodies = new ArrayList<int[]>();
 
-            while (bodyIter.hasNext()) {
-                JsonNode coord = bodyIter.next();
+            Iterator<JsonNode> ourBodyIter = moveRequest.get("you").get("body").elements();
+
+            while (ourBodyIter.hasNext()) {
+                JsonNode coord = ourBodyIter.next();
                 int x = coord.get("x").intValue();
                 int y = coord.get("y").intValue();
 
-                body.add(new int[] {x, y});
-            }
-            
-            System.out.println(id);
-            System.out.println(boardHeight);
-            System.out.println(boardWidth);
-
-            for (int i = 0; i < body.size(); i++) {
-                int[] coord = body.get(i);
-                System.out.println(coord[0] + "," + coord[1]);
+                ourBody.add(new int[] {x, y});
             }
 
-            int xHead = body.get(0)[0];
-            int yHead = body.get(0)[1];
+            Iterator<JsonNode> snakesIter = moveRequest.get("board").get("snakes").elements();
+            while (snakesIter.hasNext()){
+                Iterator<JsonNode> bodyIter = snakesIter.next().get("body").elements();
+
+                while (bodyIter.hasNext()) {
+                    JsonNode coord = bodyIter.next();
+                    int x = coord.get("x").intValue();
+                    int y = coord.get("y").intValue();
+    
+                    allBodies.add(new int[] {x, y});
+                }
+            }
+
+            int xHead = ourBody.get(0)[0];
+            int yHead = ourBody.get(0)[1];
 
             int[] right = { xHead + 1, yHead };
             int[] down = { xHead, yHead + 1 };
             int[] left = { xHead - 1, yHead };
             int[] up = { xHead, yHead - 1 };
         
-            boolean isRightValid = isInBounds(right, boardWidth, boardHeight) && !isColliding(right, body);
-            boolean isDownValid = isInBounds(down, boardWidth, boardHeight) && !isColliding(down, body);
-            boolean isLeftValid = isInBounds(left, boardWidth, boardHeight) && !isColliding(left, body);
-            boolean isUpValid = isInBounds(up, boardWidth, boardHeight) && !isColliding(up, body);
+            boolean isRightValid = isInBounds(right, boardWidth, boardHeight) && !isColliding(right, allBodies);
+            boolean isDownValid = isInBounds(down, boardWidth, boardHeight) && !isColliding(down, allBodies);
+            boolean isLeftValid = isInBounds(left, boardWidth, boardHeight) && !isColliding(left, allBodies);
+            boolean isUpValid = isInBounds(up, boardWidth, boardHeight) && !isColliding(up, allBodies);
 
             List<String> directions = new LinkedList<String>(Arrays.asList("right", "down", "left", "up"));
 
