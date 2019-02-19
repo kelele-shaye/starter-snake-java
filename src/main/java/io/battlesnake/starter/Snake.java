@@ -182,23 +182,31 @@ public class Snake {
             int xTail = ourBody.get(ourBody.size() - 1)[0];
             int yTail = ourBody.get(ourBody.size() - 1)[1];
             int[] directionVector = new int[] { 0, 0 };
-            List<AStarNode> path = grid.getPath(xHead, yHead, xTail, yTail);
+            List<AStarNode> pathToTail = grid.getPath(xHead, yHead, xTail, yTail);
 
-            if (path.size() > 0) {
-                AStarNode node = path.get(0);
+            if (pathToTail.size() > 0) {
+                AStarNode node = pathToTail.get(0);
 
                 directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };   
             }
+
+            System.out.println("Tail path size: " + pathToTail.size());
 
             if (food.size() > 0) {
                 int[] targetFood = food.get(0);
 
                 List<AStarNode> pathToFood = grid.getPath(xHead, yHead, targetFood[0], targetFood[1]);
 
+                System.out.println("Food path size: " + pathToFood.size());
+
                 if (pathToFood.size() > 0) {
                     AStarNode node = pathToFood.get(0);
 
-                    if (grid.getPath(node.getX(), node.getY(), xTail, yTail).size() > 0) {
+                    List<AStarNode> pathToTailFromFoodNode = grid.getPath(node.getX(), node.getY(), xTail, yTail);
+
+                    System.out.println("Tail food path size: " + pathToTailFromFoodNode.size());
+
+                    if (pathToTailFromFoodNode.size() > 0) {
                         directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
                     }
                 }
