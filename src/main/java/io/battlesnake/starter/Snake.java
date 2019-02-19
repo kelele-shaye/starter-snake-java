@@ -20,6 +20,10 @@ import static spark.Spark.port;
 import static spark.Spark.post;
 import static spark.Spark.get;
 
+import com.almasb.astar.AStarGrid;
+import com.almasb.astar.AStarNode;
+import com.almasb.astar.NodeState;
+
 /**
  * Snake server that deals with requests from the snake engine.
  * Just boiler plate code.  See the readme to get started.
@@ -131,8 +135,10 @@ public class Snake {
             Map<String, String> response = new HashMap<>();
             int boardHeight = moveRequest.get("board").get("height").intValue();
             int boardWidth = moveRequest.get("board").get("width").intValue();
+            AStarGrid grid = new AStarGrid(boardWidth, boardHeight);
             List<int[]> ourBody = new ArrayList<int[]>();
             List<int[]> allBodies = new ArrayList<int[]>();
+            List<int[]> food = new ArrayList<int[]>();
 
             Iterator<JsonNode> ourBodyIter = moveRequest.get("you").get("body").elements();
 
@@ -153,10 +159,73 @@ public class Snake {
                     int x = coord.get("x").intValue();
                     int y = coord.get("y").intValue();
     
+                    grid.setNodeState(x,y, NodeState.NOT_WALKABLE);
                     allBodies.add(new int[] {x, y});
                 }
             }
 
+            Iterator<JsonNode> foodIter = moveRequest.get("board").get("food").elements();
+
+            while (foodIter.hasNext()) {
+                JsonNode coord = foodIter.next();
+                int x = coord.get("x").intValue();
+                int y = coord.get("y").intValue();
+
+                food.add(new int[] {x, y});
+            }
+
+            if (food.size() == 0) {
+                response.put("move", getRandomMove(boardWidth, boardHeight, ourBody, allBodies));
+            } else {
+                int xHead = ourBody.get(0)[0];
+                int yHead = ourBody.get(0)[1];
+                int[] targetFood = food.get(0);
+
+                List<AStarNode> path = grid.getPath(xHead, yHead, targetFood[0], targetFood[1]);
+
+                if (path.size() == 0) {
+                    response.put("move", getRandomMove(boardWidth, boardHeight, ourBody, allBodies));
+                } else {
+                    AStarNode node = path.get(0);
+
+                    int[] directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
+
+                    if (directionVector[0] == 1 && directionVector[1] == 0) {
+                        response.put("move", "right");
+                    } else if (directionVector[0] == 0 && directionVector[1] == 1) {
+                        response.put("move", "down");
+                    } else if (directionVector[0] == -1 && directionVector[1] == 0) {
+                        response.put("move", "left");
+                    } else if (directionVector[0] == 0 && directionVector[1] == -1) {
+                        response.put("move", "up");
+                    }
+                }
+            }
+
+            return response;
+        }
+
+        public boolean isInBounds(int[] coord, int boardWidth, int boardHeight) {
+            if (coord[0] < 0 || coord[0] >= boardWidth || coord[1] < 0 || coord[1] >= boardHeight) {
+                return false;
+            }
+        
+            return true;
+        }
+
+        public boolean isColliding(int[] coord, List<int[]> body) {
+            for (int i = 0; i < body.size(); i++) {
+                int[] bodyCoord = body.get(i);
+
+                if (coord[0] == bodyCoord[0] && coord[1] == bodyCoord[1]) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public String getRandomMove(int boardWidth, int boardHeight, List<int[]> ourBody, List<int[]> allBodies) {
             int xHead = ourBody.get(0)[0];
             int yHead = ourBody.get(0)[1];
 
@@ -190,29 +259,7 @@ public class Snake {
 
             Random rand = new Random();
 
-            response.put("move", directions.get(rand.nextInt(directions.size())));
-
-            return response;
-        }
-
-        public boolean isInBounds(int[] coord, int boardWidth, int boardHeight) {
-            if (coord[0] < 0 || coord[0] >= boardWidth || coord[1] < 0 || coord[1] >= boardHeight) {
-                return false;
-            }
-        
-            return true;
-        }
-
-        public boolean isColliding(int[] coord, List<int[]> body) {
-            for (int i = 0; i < body.size(); i++) {
-                int[] bodyCoord = body.get(i);
-
-                if (coord[0] == bodyCoord[0] && coord[1] == bodyCoord[1]) {
-                    return true;
-                }
-            }
-
-            return false;
+            return directions.get(rand.nextInt(directions.size()));
         }
 
         /**
