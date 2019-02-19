@@ -93,7 +93,7 @@ public class Snake {
                 LOG.info("Responding with: {}", JSON_MAPPER.writeValueAsString(snakeResponse));
                 return snakeResponse;
             } catch (Exception e) {
-                LOG.warn("Something went wrong!", e);
+                LOG.error("Something went wrong!", e);
                 return null;
             }
         }
@@ -279,9 +279,13 @@ public class Snake {
                 directions.remove("up");
             }
 
-            Random rand = new Random();
+            if (directions.size() == 0) {
+                return "right";
+            } else {
+                Random rand = new Random();
 
-            return directions.get(rand.nextInt(directions.size()));
+                return directions.get(rand.nextInt(directions.size()));
+            }
         }
 
         /**
