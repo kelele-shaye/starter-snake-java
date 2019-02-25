@@ -205,7 +205,7 @@ public class Snake {
             }            
 
             if (food.size() > 0) {
-                int[] targetFood = food.get(0);
+                int[] targetFood = closestFood(ourBody.get(0), food);
 
                 List<GridCell> pathToFood = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(targetFood[0], targetFood[1]), navGrid);
 
@@ -240,6 +240,30 @@ public class Snake {
 
             return response;
         }
+
+        public int[] closestFood(int[] ourHead,List <int[]> food){
+            if (food.size() == 0) {
+                return null;
+            }
+
+            int[] closestFood = food.get(0);
+            int closestDistance = Math.abs(ourHead[0]- food.get(0)[0])+Math.abs(ourHead[1]- food.get(0)[1]);
+
+            for (int i = 1; i< food.size(); i++){
+               int distance = Math.abs(ourHead[0]- food.get(i)[0])+Math.abs(ourHead[1]- food.get(i)[1]);
+
+               if (distance < closestDistance) {
+                closestDistance = distance;
+                closestFood = food.get(i);
+
+               }
+
+            }  
+
+            return closestFood;
+        }
+
+
 
         public boolean isInBounds(int[] coord, int boardWidth, int boardHeight) {
             if (coord[0] < 0 || coord[0] >= boardWidth || coord[1] < 0 || coord[1] >= boardHeight) {
