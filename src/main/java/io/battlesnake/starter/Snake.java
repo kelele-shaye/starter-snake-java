@@ -218,21 +218,21 @@ public class Snake {
             if (food.size() > 0) {
                 int[] targetFood = closestFood(ourBody, others, food);
 
-                List<GridCell> pathToFood = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(targetFood[0], targetFood[1]), navGrid);
+                if (targetFood != null) {
+                    List<GridCell> pathToFood = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(targetFood[0], targetFood[1]), navGrid);
 
-                
-
-                if (pathToFood != null && pathToFood.size() > 0) {
-                    System.out.println("Food path size: " + pathToFood.size());
-
-                    GridCell node = pathToFood.get(0);
-
-                    List<GridCell> pathToTailFromFoodNode = finder.findPath(navGrid.getCell(node.getX(), node.getY()), navGrid.getCell(xTail, yTail), navGrid);                    
-
-                    if (pathToTailFromFoodNode != null && pathToTailFromFoodNode.size() > 0) {
-                        System.out.println("Tail food path size: " + pathToTailFromFoodNode.size());
-
-                        directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
+                    if (pathToFood != null && pathToFood.size() > 0) {
+                        System.out.println("Food path size: " + pathToFood.size());
+    
+                        GridCell node = pathToFood.get(0);
+    
+                        List<GridCell> pathToTailFromFoodNode = finder.findPath(navGrid.getCell(node.getX(), node.getY()), navGrid.getCell(xTail, yTail), navGrid);                    
+    
+                        if (pathToTailFromFoodNode != null && pathToTailFromFoodNode.size() > 0) {
+                            System.out.println("Tail food path size: " + pathToTailFromFoodNode.size());
+    
+                            directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
+                        }
                     }
                 }
             }
