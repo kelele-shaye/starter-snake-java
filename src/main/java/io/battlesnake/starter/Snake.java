@@ -180,7 +180,8 @@ public class Snake {
                     }
                 }
 
-                if (ourId != snakeNode.get("id").textValue()) {
+                if (!ourId.equals(snakeNode.get("id").textValue())) {
+                    System.out.println(ourId + " " + snakeNode.get("id").textValue());
                     others.add(snake);
                 }
             }
