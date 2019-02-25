@@ -138,8 +138,10 @@ public class Snake {
             int boardWidth = moveRequest.get("board").get("width").intValue();
             GridCell[][] grid = new GridCell[boardWidth][boardHeight];
             List<int[]> ourBody = new ArrayList<int[]>();
+            List<List<int[]>> others = new ArrayList<List<int[]>>();
             List<int[]> allBodies = new ArrayList<int[]>();
             List<int[]> food = new ArrayList<int[]>();
+            String ourId = moveRequest.get("you").get("id").textValue();
 
             for (int i = 0; i < grid.length; i++) {
                 for (int j = 0; j < grid[i].length; j++) {
@@ -159,18 +161,27 @@ public class Snake {
 
             Iterator<JsonNode> snakesIter = moveRequest.get("board").get("snakes").elements();
             while (snakesIter.hasNext()){
-                Iterator<JsonNode> bodyIter = snakesIter.next().get("body").elements();
+                List<int[]> snake = new ArrayList<int[]>();
+                JsonNode snakeNode = snakesIter.next();
+                Iterator<JsonNode> bodyIter = snakeNode.get("body").elements();
 
                 while (bodyIter.hasNext()) {
                     JsonNode coord = bodyIter.next();
+                    int x = coord.get("x").intValue();
+                    int y = coord.get("y").intValue();
+
+                    snake.add(new int[] {x, y});
 
                     if (bodyIter.hasNext()) {
-                        int x = coord.get("x").intValue();
-                        int y = coord.get("y").intValue();
+
         
                         grid[x][y] = new GridCell(x, y, false);
                         allBodies.add(new int[] {x, y});
                     }
+                }
+
+                if (ourId != snakeNode.get("id").textValue()) {
+                    others.add(snake);
                 }
             }
 
@@ -205,7 +216,7 @@ public class Snake {
             }            
 
             if (food.size() > 0) {
-                int[] targetFood = closestFood(ourBody.get(0), food);
+                int[] targetFood = closestFood(ourBody, others, food);
 
                 List<GridCell> pathToFood = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(targetFood[0], targetFood[1]), navGrid);
 
@@ -241,23 +252,44 @@ public class Snake {
             return response;
         }
 
-        public int[] closestFood(int[] ourHead,List <int[]> food){
+        public int[] closestFood(List<int[]> ourBody, List<List<int[]>> others, List <int[]> food){
             if (food.size() == 0) {
                 return null;
             }
 
-            int[] closestFood = food.get(0);
-            int closestDistance = Math.abs(ourHead[0]- food.get(0)[0])+Math.abs(ourHead[1]- food.get(0)[1]);
+            int[] ourHead = ourBody.get(0);
+            int[] closestFood = null;
+            int closestDistance = Integer.MAX_VALUE;
 
-            for (int i = 1; i< food.size(); i++){
-               int distance = Math.abs(ourHead[0]- food.get(i)[0])+Math.abs(ourHead[1]- food.get(i)[1]);
+            for (int i = 0; i< food.size(); i++){
+                boolean isValid = true;
+                int[] currentFood = food.get(i);
+                int distance = Math.abs(ourHead[0]- currentFood[0])+Math.abs(ourHead[1]- currentFood[1]);
 
-               if (distance < closestDistance) {
-                closestDistance = distance;
-                closestFood = food.get(i);
+                if (distance < closestDistance) {
+                    for (int j = 0; j < others.size(); j++) {
+                        List<int[]> enemySnake = others.get(j);
+                        int[] enemyHead = enemySnake.get(0);
 
+                        if (enemySnake.size() < ourBody.size()) {
+                            continue;
+                        } else {
+                            int enemyDistance = Math.abs(enemyHead[0]- currentFood[0])+Math.abs(enemyHead[1]- currentFood[1]);
+
+                            if (distance >= enemyDistance) {
+                                isValid = false;
+                                break;
+                            }
+                        }
+                    }
+               } else {
+                   isValid = false;
                }
 
+               if (isValid) {
+                    closestDistance = distance;
+                    closestFood = food.get(i);
+                }
             }  
 
             return closestFood;
