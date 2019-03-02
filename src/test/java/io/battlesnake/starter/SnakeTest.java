@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Map;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -40,7 +41,7 @@ public class SnakeTest {
 
     @Test
     void moveTest() throws IOException {
-        JsonNode moveRequest = OBJECT_MAPPER.readTree("{}");
+        JsonNode moveRequest = OBJECT_MAPPER.readTree(Paths.get("src/test/java/io/battlesnake/starter/fixtures/move.json").toFile());
         Map<String, String> response = handler.move(moveRequest);
         assertEquals("right", response.get("move"));
     }
