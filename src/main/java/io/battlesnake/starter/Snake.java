@@ -214,7 +214,7 @@ public class Snake {
                 directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };   
             }            
 
-            if (food.size() > 0 && health < 50) {
+            if (food.size() > 0 && health < 80) {
                 int[] targetFood = closestFood(ourBody, others, food);
 
                 if (targetFood != null) {
