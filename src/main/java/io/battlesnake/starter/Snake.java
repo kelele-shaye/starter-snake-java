@@ -179,7 +179,9 @@ public class Snake {
                         grid[x][y] = new GridCell(x, y, false);
                         allBodies.add(new int[] {x, y});
                     } else {
-                        grid[x][y] = new GridCell(x, y, true);
+                        if (distance(ourBody.get(0), new int[]{x, y}) != 1) {
+                            grid[x][y] = new GridCell(x, y, true);
+                        }
                     }
                 }
 
@@ -247,6 +249,10 @@ public class Snake {
             }
 
             return response;
+        }
+
+        public int distance(int[] node1, int[] node2) {
+            return Math.abs(node1[0]- node2[0])+Math.abs(node1[1]- node2[1]);
         }
 
         public int[] closestFood(List<int[]> ourBody, List<List<int[]>> others, List <int[]> food){
