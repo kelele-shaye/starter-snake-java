@@ -136,6 +136,7 @@ public class Snake {
             Map<String, String> response = new HashMap<>();
             int boardHeight = moveRequest.get("board").get("height").intValue();
             int boardWidth = moveRequest.get("board").get("width").intValue();
+            int health = moveRequest.get("you").get("health").intValue();
             GridCell[][] grid = new GridCell[boardWidth][boardHeight];
             List<int[]> ourBody = new ArrayList<int[]>();
             List<List<int[]>> others = new ArrayList<List<int[]>>();
@@ -213,7 +214,7 @@ public class Snake {
                 directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };   
             }            
 
-            if (food.size() > 0) {
+            if (food.size() > 0 && health < 50) {
                 int[] targetFood = closestFood(ourBody, others, food);
 
                 if (targetFood != null) {
