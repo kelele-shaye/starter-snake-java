@@ -175,9 +175,11 @@ public class Snake {
 
                     if (bodyIter.hasNext()) {
 
-        
+                        
                         grid[x][y] = new GridCell(x, y, false);
                         allBodies.add(new int[] {x, y});
+                    } else {
+                        grid[x][y] = new GridCell(x, y, true);
                     }
                 }
 
