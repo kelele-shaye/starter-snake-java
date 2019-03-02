@@ -181,7 +181,6 @@ public class Snake {
                 }
 
                 if (!ourId.equals(snakeNode.get("id").textValue())) {
-                    System.out.println(ourId + " " + snakeNode.get("id").textValue());
                     others.add(snake);
                 }
             }
@@ -209,8 +208,6 @@ public class Snake {
             List<GridCell> pathToTail = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(xTail, yTail), navGrid);
 
             if (pathToTail != null && pathToTail.size() > 0) {
-                System.out.println("Tail path size: " + pathToTail.size());
-
                 GridCell node = pathToTail.get(0);
 
                 directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };   
@@ -223,15 +220,11 @@ public class Snake {
                     List<GridCell> pathToFood = finder.findPath(navGrid.getCell(xHead, yHead), navGrid.getCell(targetFood[0], targetFood[1]), navGrid);
 
                     if (pathToFood != null && pathToFood.size() > 0) {
-                        System.out.println("Food path size: " + pathToFood.size());
-    
                         GridCell node = pathToFood.get(0);
     
                         List<GridCell> pathToTailFromFoodNode = finder.findPath(navGrid.getCell(node.getX(), node.getY()), navGrid.getCell(xTail, yTail), navGrid);                    
     
                         if (pathToTailFromFoodNode != null && pathToTailFromFoodNode.size() > 0) {
-                            System.out.println("Tail food path size: " + pathToTailFromFoodNode.size());
-    
                             directionVector = new int []{ node.getX() - xHead, node.getY() - yHead };
                         }
                     }

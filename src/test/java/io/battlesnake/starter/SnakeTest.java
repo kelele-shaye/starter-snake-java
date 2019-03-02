@@ -11,6 +11,8 @@ import java.util.Map;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SnakeTest {
 
@@ -43,7 +45,12 @@ public class SnakeTest {
     void moveTest() throws IOException {
         JsonNode moveRequest = OBJECT_MAPPER.readTree(Paths.get("src/test/java/io/battlesnake/starter/fixtures/move.json").toFile());
         Map<String, String> response = handler.move(moveRequest);
-        assertEquals("right", response.get("move"));
+        String move = response.get("move");
+
+        System.out.println("Next move: " + move);
+
+        assertNotNull(move);
+        assertTrue((move == "right" || move == "down" || move == "left" || move == "up"));
     }
 
     @Test
