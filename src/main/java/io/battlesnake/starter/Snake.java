@@ -165,6 +165,8 @@ public class Snake {
                 List<int[]> snake = new ArrayList<int[]>();
                 JsonNode snakeNode = snakesIter.next();
                 Iterator<JsonNode> bodyIter = snakeNode.get("body").elements();
+                boolean checkedHead = false;
+
 
                 while (bodyIter.hasNext()) {
                     JsonNode coord = bodyIter.next();
@@ -172,6 +174,49 @@ public class Snake {
                     int y = coord.get("y").intValue();
 
                     snake.add(new int[] {x, y});
+
+                    if (!ourId.equals(snakeNode.get("id").textValue())) {
+                       if(!checkedHead){
+                           int eHeadx = x + 1;
+                           int eHeady = y;
+
+                           if (eHeadx >= 0 && eHeadx < boardWidth && eHeady >= 0 && eHeady > boardHeight) {
+                               grid[eHeadx][eHeady] = new GridCell(eHeadx, eHeady, false);
+                           }
+
+                           eHeadx = x - 1;
+                           eHeady = y;
+
+                           if (eHeadx >= 0 && eHeadx < boardWidth && eHeady >= 0 && eHeady > boardHeight) {
+                            grid[eHeadx][eHeady] = new GridCell(eHeadx, eHeady, false);
+                            }
+
+                           eHeadx = x;
+                           eHeady = y + 1;
+
+                           if (eHeadx >= 0 && eHeadx < boardWidth && eHeady >= 0 && eHeady > boardHeight) {
+                            grid[eHeadx][eHeady] = new GridCell(eHeadx, eHeady, false);
+                            }
+
+                           eHeadx = x;
+                           eHeady = y - 1;
+
+                           if (eHeadx >= 0 && eHeadx < boardWidth && eHeady >= 0 && eHeady > boardHeight) {
+                            grid[eHeadx][eHeady] = new GridCell(eHeadx, eHeady, false);
+                            }                                                   
+                           checkedHead = true;
+                       }
+                       
+                        // if checkedHead is false
+                        // then we are looking at the head
+                        // add in logic for adding neighbor heads to board
+                        // so checkedHead is now true
+                    }
+
+                    // If snake is not our snake [X]
+                    // If first piece of body (head) [X]
+                    // for each neighbor of head [X]
+                    // make inaccessible [X]
 
                     if (bodyIter.hasNext()) {
 
